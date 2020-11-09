@@ -1,7 +1,7 @@
 import { tick } from "./gol";
 import { assert } from "chai";
 
-describe('Rules', () => {
+describe('Game of Life Rules', () => {
     it('Any live cell with fewer than two live neighbours dies, as if by underpopulation', () => {
         const grid = [
             [1, 0],

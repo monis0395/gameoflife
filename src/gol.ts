@@ -1,4 +1,4 @@
-function getNeighbours(grid: number[][], rowIndex: number, colIndex: number) {
+function getNeighbours(grid: CellState[][], rowIndex: number, colIndex: number) {
     const leftCell = grid?.[rowIndex]?.[colIndex - 1];
     const rightCell = grid?.[rowIndex]?.[colIndex + 1];
     const topCell = grid?.[rowIndex - 1]?.[colIndex];
@@ -19,8 +19,8 @@ function getNeighbours(grid: number[][], rowIndex: number, colIndex: number) {
     }
 }
 
-function getAliveNeighboursCount(neighbours: { topCell: number; bottomCell: number; topRightCell: number; bottomLeftCell: number; topLeftCell: number; bottomRightCell: number; leftCell: number; rightCell: number }) {
-    return Object.values(neighbours).reduce((sum, current) => sum + (current || 0), 0);
+function getAliveNeighboursCount(neighbours: { [position: string]: CellState }) {
+    return Object.values(neighbours).filter((cellState) => cellState === CellState.Alive).length;
 }
 
 export enum CellState {
@@ -46,16 +46,16 @@ const ruleBook = [{
     returnState: CellState.Alive,
 }];
 
-function forEachCell(grid, callback) {
+function getNextGeneration(grid: CellState[][], forEachCell: (current: CellState, row: number, col: number) => CellState) {
     return grid.map((row, rowIndex) => {
         return row.map((currentCellState, colIndex) => {
-            return callback(currentCellState, rowIndex, colIndex)
+            return forEachCell(currentCellState, rowIndex, colIndex)
         });
     });
 }
 
-export function tick(grid: number[][]): number[][] {
-    return forEachCell(grid, (current: CellState, rowIndex, colIndex) => {
+export function tick(grid: CellState[][]): CellState[][] {
+    return getNextGeneration(grid, (current, rowIndex, colIndex) => {
         const neighbours = getNeighbours(grid, rowIndex, colIndex);
         const aliveNeighboursCount = getAliveNeighboursCount(neighbours);
         const rule = ruleBook.find((rule) => current === rule.inputState && rule.predicate(aliveNeighboursCount));
